@@ -1,192 +1,195 @@
-const readline = require('readline');
-
-// Classes
-class Livro {
-    constructor(titulo, autor) {
-        this.titulo = titulo;
-        this.autor = autor;
-        this.disponivel = true;
-    }
-}
-
-class Usuario {
-    constructor(nome, email, telefone) {
-        this.nome = nome;
-        this.email = email;
-        this.telefone = telefone;
-        this.livrosEmprestados = [];
-    }
-}
-
-class Emprestimo {
-    constructor(usuario, livro) {
-        this.usuario = usuario;
-        this.livro = livro;
-        this.dataEmprestimo = new Date();
-        this.dataDevolucao = null;
-        this.multa = 0;
-    }
-
-    devolverLivro() {
-        const hoje = new Date();
-        const tempoEmprestimo = Math.floor((hoje - this.dataEmprestimo) / (1000 * 60 * 60 * 24));
-
-        if (tempoEmprestimo > 7) {
-            this.multa = (tempoEmprestimo - 7) * 1.0; // R$ 1,00 por dia de atraso
-        }
-
-        this.livro.disponivel = true;
-        this.dataDevolucao = hoje;
-    }
-}
-
-class Biblioteca {
-    constructor() {
-        this.livros = [];
-        this.usuarios = [];
-        this.emprestimos = [];
-    }
-
-    cadastrarLivro(titulo, autor) {
-        const livro = new Livro(titulo, autor);
-        this.livros.push(livro);
-        console.log(`Livro "${titulo}" cadastrado com sucesso!`);
-    }
-
-    cadastrarUsuario(nome, email, telefone) {
-        const usuario = new Usuario(nome, email, telefone);
-        this.usuarios.push(usuario);
-        console.log(`Usuário "${nome}" cadastrado com sucesso!`);
-    }
-
-    emprestarLivro(nomeUsuario, tituloLivro) {
-        const usuario = this.usuarios.find(user => user.nome === nomeUsuario);
-        const livro = this.livros.find(book => book.titulo === tituloLivro && book.disponivel);
-
-        if (!usuario) {
-            console.log("Usuário não encontrado.");
-            return;
-        }
-        if (!livro) {
-            console.log("Livro não disponível.");
-            return;
-        }
-
-        livro.disponivel = false;
-        const emprestimo = new Emprestimo(usuario, livro);
-        usuario.livrosEmprestados.push(livro);
-        this.emprestimos.push(emprestimo);
-
-        console.log(`Livro "${tituloLivro}" emprestado para ${nomeUsuario}.`);
-    }
-
-    devolverLivro(nomeUsuario, tituloLivro) {
-        const emprestimo = this.emprestimos.find(emp =>
-            emp.usuario.nome === nomeUsuario &&
-            emp.livro.titulo === tituloLivro &&
-            emp.dataDevolucao === null
-        );
-
-        if (!emprestimo) {
-            console.log("Empréstimo não encontrado.");
-            return;
-        }
-
-        emprestimo.devolverLivro();
-        console.log(`Livro "${tituloLivro}" devolvido por ${nomeUsuario}. Multa: R$${emprestimo.multa.toFixed(2)}`);
-    }
-
-    exibirRelatorios() {
-        console.log(`
-=== Relatórios ===
-
-Livros disponíveis:
-${this.livros.filter(l => l.disponivel).map(l => `- ${l.titulo} (${l.autor})`).join('\n')}
-
-Livros emprestados:
-${this.livros.filter(l => !l.disponivel).map(l => `- ${l.titulo} (${l.autor})`).join('\n')}
-
-Usuários cadastrados:
-${this.usuarios.map(u => `- ${u.nome} (${u.email}, ${u.telefone})`).join('\n')}
-
-Empréstimos ativos:
-${this.emprestimos.filter(e => e.dataDevolucao === null).map(e => `- ${e.livro.titulo} para ${e.usuario.nome} (Emprestado em: ${e.dataEmprestimo.toLocaleDateString()})`).join('\n')}
-
-Empréstimos com multa:
-${this.emprestimos.filter(e => e.multa > 0).map(e => `- ${e.livro.titulo} para ${e.usuario.nome} (Multa: R$ ${e.multa.toFixed(2)})`).join('\n')}
-        `);
-    }
-}
-
-// Configuração do readline
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-const biblioteca = new Biblioteca();
-
-// Função para exibir o menu
-function menu() {
-    console.log(`
-=== Sistema de Biblioteca ===
-1. Cadastrar livro
-2. Cadastrar usuário
-3. Emprestar livro
-4. Devolver livro
-5. Exibir relatórios
-6. Sair
-    `);
-
-    rl.question("Escolha uma opção: ", (opcao) => {
-        switch (opcao) {
-            case '1':
-                rl.question("Título do livro: ", (titulo) => {
-                    rl.question("Autor do livro: ", (autor) => {
-                        biblioteca.cadastrarLivro(titulo, autor);
-                        menu();
-                    });
-                });
-                break;
-            case '2':
-                rl.question("Nome do usuário: ", (nome) => {
-                    rl.question("E-mail do usuário: ", (email) => {
-                        rl.question("Telefone do usuário: ", (telefone) => {
-                            biblioteca.cadastrarUsuario(nome, email, telefone);
-                            menu();
-                        });
-                    });
-                });
-                break;
-            case '3':
-                rl.question("Nome do usuário: ", (nomeUsuario) => {
-                    rl.question("Título do livro: ", (tituloLivro) => {
-                        biblioteca.emprestarLivro(nomeUsuario, tituloLivro);
-                        menu();
-                    });
-                });
-                break;
-            case '4':
-                rl.question("Nome do usuário: ", (nomeUsuario) => {
-                    rl.question("Título do livro: ", (tituloLivro) => {
-                        biblioteca.devolverLivro(nomeUsuario, tituloLivro);
-                        menu();
-                    });
-                });
-                break;
-            case '5':
-                biblioteca.exibirRelatorios();
-                menu();
-                break;
-            case '6':
-                rl.close();
-                break;
-            default:
-                console.log("Opção inválida. Tente novamente.");
-                menu();
-        }
+console.clear();
+//arrays
+const biblioteca = [];
+const usuarios = [];
+const livrosEmprestados = [];
+const addMulta = [];
+const quitado = [];
+//Menu de opções
+menu:
+while (true){
+    const menu = `
+    Selecione uma das opções:
+    1 - Cadastrar livro:
+    2 - Exibir lista de livros:
+    3 - Cadrastrar Usuário:
+    4 - Exibir lista de Usuários:
+    5 - Realizar empréstimos de livros:
+    6 - Registrar devoluções de livros:
+    7 - Calcular multas por atraso na devolução:
+    8 - Exibir relatórios:
+    0 - Sair.
+    : `;
+    const opcao = parseInt(prompt(menu));
+    switch (opcao){
+        case 1:
+            adicionarLivro();
+            break;
+        case 2:
+            listarLivros();
+            break;
+        case 3: 
+            cadastrarUsuario();
+            break;
+        case 4:
+            listarUsuarios();
+            break;
+        case 5:
+            emprestimos();
+            break;
+        case 6:
+            devolucoes();
+            break;
+        case 7:
+            calcular();
+            break;
+        case 8:
+            relatorios();
+            break;
+        case 0:
+            console.log('Sistema encerrado.');
+            break menu;
+        default:
+            console.log('Opção inválida.');
+    };
+};
+//Funções
+//Adicionar livros
+function adicionarLivro() {
+    let livro = { 
+        titulo: prompt('Digite o Titulo do Livro: ').toLocaleUpperCase(),
+        autor: prompt('Digite o nome do Autor: ').toLocaleUpperCase(),
+        disponivel: true };
+    biblioteca.push(livro);
+    console.log(`Livro "${livro.titulo}" adicionado!`);
+};
+//Exibir livros
+function listarLivros() {
+    console.log("\nLista de Livros:");
+    biblioteca.forEach((livro, index) => {
+        const status = livro.disponivel ? "Disponível" : "Emprestado";
+        console.log(`${index + 1}. ${livro.titulo} - ${livro.autor} (${status})`);
     });
-}
+};
+//Adicionar usuarios
+function cadastrarUsuario() {
+    let usuario = { 
+        nome: prompt('Digite seu nome: ').toLocaleUpperCase(),
+        email: prompt('Digite seu email: ').toLocaleUpperCase(), 
+        telefone: Number(prompt('Digite seu contato(número de celular): ')),
+    };
+    usuarios.push(usuario);
+    console.log(`Usuário "${usuario.nome}" cadastrado com sucesso!`);
+};
+//Exibir lista de usuarios
+function listarUsuarios() {
+    console.log("\nLista de Usuários:");
+    usuarios.forEach((usuario, index) => {
+        console.log(`${index + 1}. ${usuario.nome} - ${usuario.email} - ${usuario.telefone}`);
+    });
+};
+//Livros emprestados
+function emprestimos() {
+    console.log('Selecione o titulo do livro a ser emprestado: *ATENÇÃO O PRAZO PARA DEVOLUÇÃO É DE 7 DIAS, AO PASSAR DESSE PRAZO ACARRETARA EM MULTA NO VALOR DE 1 REAL O DIA.');
+    let nome = prompt('Digite seu nome: ').toLocaleUpperCase();
+    let nomeIndex = usuarios.find((nomeObj) => nomeObj.nome === nome);
+    if (!nomeIndex) {
+        console.log('Nome do usuario não encontrado.');
+        return;
+    };
+    let livro = prompt('Digite o titulo do livro: ').toLocaleUpperCase();
+    let livroIndex = biblioteca.find((livroObj) => livroObj.titulo === livro && livroObj.disponivel);
+    if (!livroIndex) {
+          console.log('Titulo não encontrado.');
+          return;
+    };
+    livroIndex.disponivel = false;
+    livrosEmprestados.push({nome: nome, livro: livro, dataEmprestimo: new Date()});
+        console.log('Emprestimos realizado com sucesso, consulte a opção "Exibir Relatórios (8)" para mais informações.');
+};
+//Exibir emprestimos
+function listarEmprestimos(){
+    console.log('\nLista de Empréstimos:');
+    if (livrosEmprestados.length === 0){
+        console.log('Nenhum Emprestimo ativo.')
+        return;
+    };
+    livrosEmprestados.forEach((emprestimo, index) => {
+        console.log(`${index + 1}. ${emprestimo.nome} - ${emprestimo.livro}`);   
+    });
+};
+//Devoluções dos emprestimos
+function devolucoes(){
+    const nome = prompt('Digite seu nome de usuario: ').toLocaleUpperCase();
+    const livro = prompt('Digite o titulo do livro: ').toLocaleUpperCase();
+    const devolucoesIndex = livrosEmprestados.findIndex(a => a.nome === nome && a.livro === livro);
 
-// Inicia o sistema
-menu();
+    if(devolucoesIndex === -1){
+        console.log('Emprestido não encontrado.');
+        return;
+    };
+    let tituloIndex = biblioteca.find(b => b.titulo === livro);
+    tituloIndex.disponivel = true;
+    //Remove do emprestimo
+    livrosEmprestados.splice(devolucoesIndex, 1);
+    console.log(`Devolução realizada.`);
+};
+//Calcula o prazo para a devolução dos emprestimos e a multa por atraso
+function calcular(){
+    const atual = new Date();
+    if (livrosEmprestados.length === 0) {
+        console.log("Nenhum livro emprestado para calcular.");
+        return;
+    };
+    //Limpa os arrays antes do calculo
+    addMulta.length = 0;
+    quitado.length = 0; 
+
+    livrosEmprestados.forEach(a => {
+        const dateDevolucao = new Date(a.dataEmprestimo);
+        dateDevolucao.setDate(dateDevolucao.getDate() + 7);
+        const {nome, livro} = a;
+
+        if(atual > dateDevolucao){
+            const atraso = Math.ceil((atual - dateDevolucao) / (1000 * 60 * 60 * 24));
+            const multa = atraso * 1;
+            console.log(`Em atraso:
+                Usuario: ${nome} - Livro: ${livro} - Multa: R$${multa}`);
+                addMulta.push({nome, livro, multa});
+        } else {
+            console.log(`Usuario: ${nome} - Livro: ${livro}. Em dia.`);
+            quitado.push({nome: nome, livro});
+        };
+    });
+};
+//Exibe a multa
+function addMultas(){
+    if(addMulta.length === 0){
+        console.log('Nenhuma multa pendente.');
+        return;
+    };
+    console.log(' ---- Multas pendentes ----');
+    addMulta.forEach((item, index) => {
+        console.log(`${index + 1}. Usúario: ${item.nome} - Livro: ${item.livro} - Multa: ${item.multa.toFixed(2)}`)
+    }); 
+};
+//Exibe se o usuario esta em dia
+function emdia(){
+    if(quitado.length === 0){
+        console.log('Sem resistros de usúarios em dias')
+        return;
+    };
+    console.log(' ---- Em dia ----');
+    quitado.forEach((item, index) => {
+        console.log(`${index + 1}. Usúario: ${item.nome} - Livro: ${item.livro}.`)
+    });
+};
+//Relatorio das funções
+function relatorios(){
+    console.log('*** Relatórios ***' );
+    listarLivros();
+    listarEmprestimos();
+    listarUsuarios();
+    addMultas();
+    emdia();
+};
