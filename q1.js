@@ -1,11 +1,10 @@
-console.clear();
 //arrays
 const biblioteca = [];
 const usuarios = [];
 const livrosEmprestados = [];
 const addMulta = [];
 const quitado = [];
-//Menu de opções
+
 menu:
 while (true){
     const menu = `
@@ -53,8 +52,7 @@ while (true){
             console.log('Opção inválida.');
     };
 };
-//Funções
-//Adicionar livros
+
 function adicionarLivro() {
     let livro = { 
         titulo: prompt('Digite o Titulo do Livro: ').toLocaleUpperCase(),
@@ -63,7 +61,7 @@ function adicionarLivro() {
     biblioteca.push(livro);
     console.log(`Livro "${livro.titulo}" adicionado!`);
 };
-//Exibir livros
+
 function listarLivros() {
     console.log("\nLista de Livros:");
     biblioteca.forEach((livro, index) => {
@@ -71,7 +69,7 @@ function listarLivros() {
         console.log(`${index + 1}. ${livro.titulo} - ${livro.autor} (${status})`);
     });
 };
-//Adicionar usuarios
+
 function cadastrarUsuario() {
     let usuario = { 
         nome: prompt('Digite seu nome: ').toLocaleUpperCase(),
@@ -81,14 +79,14 @@ function cadastrarUsuario() {
     usuarios.push(usuario);
     console.log(`Usuário "${usuario.nome}" cadastrado com sucesso!`);
 };
-//Exibir lista de usuarios
+
 function listarUsuarios() {
     console.log("\nLista de Usuários:");
     usuarios.forEach((usuario, index) => {
         console.log(`${index + 1}. ${usuario.nome} - ${usuario.email} - ${usuario.telefone}`);
     });
 };
-//Livros emprestados
+
 function emprestimos() {
     console.log('Selecione o titulo do livro a ser emprestado: *ATENÇÃO O PRAZO PARA DEVOLUÇÃO É DE 7 DIAS, AO PASSAR DESSE PRAZO ACARRETARA EM MULTA NO VALOR DE 1 REAL O DIA.');
     let nome = prompt('Digite seu nome: ').toLocaleUpperCase();
@@ -107,7 +105,7 @@ function emprestimos() {
     livrosEmprestados.push({nome: nome, livro: livro, dataEmprestimo: new Date()});
         console.log('Emprestimos realizado com sucesso, consulte a opção "Exibir Relatórios (8)" para mais informações.');
 };
-//Exibir emprestimos
+
 function listarEmprestimos(){
     console.log('\nLista de Empréstimos:');
     if (livrosEmprestados.length === 0){
@@ -118,7 +116,7 @@ function listarEmprestimos(){
         console.log(`${index + 1}. ${emprestimo.nome} - ${emprestimo.livro}`);   
     });
 };
-//Devoluções dos emprestimos
+
 function devolucoes(){
     const nome = prompt('Digite seu nome de usuario: ').toLocaleUpperCase();
     const livro = prompt('Digite o titulo do livro: ').toLocaleUpperCase();
@@ -130,18 +128,18 @@ function devolucoes(){
     };
     let tituloIndex = biblioteca.find(b => b.titulo === livro);
     tituloIndex.disponivel = true;
-    //Remove do emprestimo
+    
     livrosEmprestados.splice(devolucoesIndex, 1);
     console.log(`Devolução realizada.`);
 };
-//Calcula o prazo para a devolução dos emprestimos e a multa por atraso
+
 function calcular(){
     const atual = new Date();
     if (livrosEmprestados.length === 0) {
         console.log("Nenhum livro emprestado para calcular.");
         return;
     };
-    //Limpa os arrays antes do calculo
+    
     addMulta.length = 0;
     quitado.length = 0; 
 
@@ -162,7 +160,7 @@ function calcular(){
         };
     });
 };
-//Exibe a multa
+
 function addMultas(){
     if(addMulta.length === 0){
         console.log('Nenhuma multa pendente.');
@@ -173,7 +171,7 @@ function addMultas(){
         console.log(`${index + 1}. Usúario: ${item.nome} - Livro: ${item.livro} - Multa: ${item.multa.toFixed(2)}`)
     }); 
 };
-//Exibe se o usuario esta em dia
+
 function emdia(){
     if(quitado.length === 0){
         console.log('Sem resistros de usúarios em dias')
@@ -184,7 +182,7 @@ function emdia(){
         console.log(`${index + 1}. Usúario: ${item.nome} - Livro: ${item.livro}.`)
     });
 };
-//Relatorio das funções
+
 function relatorios(){
     console.log('*** Relatórios ***' );
     listarLivros();
